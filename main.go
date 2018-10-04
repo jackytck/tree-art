@@ -1,8 +1,18 @@
 package main
 
-import "github.com/fogleman/ln/ln"
+import (
+	"math"
+
+	"github.com/fogleman/ln/ln"
+)
 
 func main() {
+	cube("cube")
+	hole(xxyy, "hole")
+	hole(cosxy, "cos")
+}
+
+func cube(out string) {
 	// create a scene and add a single cube
 	scene := ln.Scene{}
 	scene.Add(ln.NewCube(ln.Vector{X: -1, Y: -1, Z: -1}, ln.Vector{X: 1, Y: 1, Z: 1}))
@@ -24,8 +34,37 @@ func main() {
 	paths := scene.Render(eye, center, up, width, height, fovy, znear, zfar, step)
 
 	// render the paths in an image
-	paths.WriteToPNG("out.png", width, height)
+	paths.WriteToPNG(out+".png", width, height)
 
 	// save the paths as an svg
-	paths.WriteToSVG("out.svg", width, height)
+	paths.WriteToSVG(out+".svg", width, height)
+}
+
+func xxyy(x, y float64) float64 {
+	return -1 / (x*x + y*y)
+}
+
+func cosxy(x, y float64) float64 {
+	return math.Cos(x*y) * (x*x - y*y)
+}
+
+func hole(f func(x, y float64) float64, out string) {
+	scene := ln.Scene{}
+
+	// add func
+	box := ln.Box{
+		Min: ln.Vector{X: -2, Y: -2, Z: -4},
+		Max: ln.Vector{X: 2, Y: 2, Z: 2},
+	}
+	scene.Add(ln.NewFunction(f, box, ln.Below))
+
+	eye := ln.Vector{X: 3, Y: 0, Z: 3}
+	center := ln.Vector{X: 1.1, Y: 0, Z: 0}
+	up := ln.Vector{X: 0, Y: 0, Z: 1}
+	width := 1024.0
+	height := 1024.0
+
+	paths := scene.Render(eye, center, up, width, height, 50, 0.1, 100, 0.01)
+	paths.WriteToPNG(out+".png", width, height)
+	paths.WriteToSVG(out+".svg", width, height)
 }
