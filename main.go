@@ -11,6 +11,8 @@ func main() {
 	hole(xxyy, "hole")
 	sphere("sphere", false)
 	sphere("outline-sphere", true)
+	cylinder("cylinder", false)
+	cylinder("outline-cylinder", true)
 }
 
 func cube(out string) {
@@ -85,6 +87,29 @@ func sphere(out string, outline bool) {
 		scene.Add(o)
 	} else {
 		s := ln.NewSphere(center, radius)
+		scene.Add(s)
+	}
+
+	paths := scene.Render(eye, center, up, width, height, 50, 0.1, 100, 0.01)
+	paths.WriteToPNG(out+".png", width, height)
+	paths.WriteToSVG(out+".svg", width, height)
+}
+
+func cylinder(out string, outline bool) {
+	scene := ln.Scene{}
+
+	eye := ln.Vector{X: 3, Y: 0, Z: 3}
+	center := ln.Vector{X: 1.1, Y: 0, Z: 0}
+	up := ln.Vector{X: 0, Y: 0, Z: 1}
+	radius := 0.333
+	width := 1024.0
+	height := 1024.0
+
+	if outline {
+		o := ln.NewOutlineCylinder(eye, up, radius, -3, 3)
+		scene.Add(o)
+	} else {
+		s := ln.NewCylinder(radius, -3, 3)
 		scene.Add(s)
 	}
 
